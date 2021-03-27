@@ -1,6 +1,7 @@
 """Module to setup fastapi API to expose API to the outside world."""
 import logging
 import random
+from collections import Counter
 from typing import Any, Dict
 
 from fastapi import FastAPI
@@ -43,19 +44,6 @@ def get_lists() -> Dict[str, Any]:
 def get_list_intersection_counts() -> Dict[str, int]:
     """Return the error intersection counts between a set of resolved, unresolved and backlog lists -
         intersection_counts: Dict[str, int]
-    -------
-        e.g.:
-        ```json
-        {
-            "resolved_unresolved": 12,
-            "resolved_backlog": 6,
-            "unresolved_backlog": 35
-        }
-        ```
-        `"resolved_unresolved": 12` describes that there are `12` errors with the *same error code*  shared
-        between a `resolved` and `unresolved` list, `"resolved_backlog": 6` describes that there are `6`
-        errors with the *same error code*  shared between a `resolved` and `backlog` list.
-
     """
     # Generate the three lists required for this calculation
     LOGGER.info('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
@@ -79,6 +67,39 @@ def get_list_intersection_counts() -> Dict[str, int]:
         'resolved_unresolved': len(resolved_unresolved_codes),
         'resolved_backlog': len(resolved_backlog_codes),
         'unresolved_backlog': len(unresolved_backlog_codes),
+    }
+
+
+@app.get("/get_error_resolved_counts")
+def get_error_resolved_counts() -> Dict[str, Dict]:
+    """ returns how many times each error.code was resolved """
+
+    # Generate the three lists required for this calculation
+    LOGGER.info('Generating resolved, unresolved and backlog lists.')
+    error_lists = _generate_lists()
+
+    resolved = error_lists['resolved']
+    resolved_codes = [d['code'] for d in resolved]
+    # print(*resolved_codes)
+    resolved_dict = Counter(resolved_codes)
+
+    return {
+        'resolved': resolved_dict,
+    }
+
+
+@app.get("/get_error_resolved_count")
+def get_error_resolved_count(error_code: int) -> Dict[str, int]:
+    """ returns how many times a certain error.code was resolved """
+    # Generate the three lists required for this calculation
+    error_lists = _generate_lists()
+
+    resolved = error_lists['resolved']
+    resolved_codes = [d['code'] for d in resolved]
+    # print(*resolved_codes)
+    resolved_count = resolved_codes.count(error_code)
+    return {
+        'resolved': resolved_count,
     }
 
 
