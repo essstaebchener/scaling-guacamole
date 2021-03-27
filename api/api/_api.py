@@ -9,6 +9,7 @@ import uvicorn
 
 ERROR_CODES = [error_code for error_code in range(50)]
 LOGGER = logging.getLogger("API")
+logging.basicConfig(level=logging.DEBUG)
 app = FastAPI()
 
 
@@ -51,16 +52,18 @@ def get_list_intersection_counts() -> Dict[str, int]:
 
     resolved, unresolved, backlog = error_lists['resolved'], error_lists['unresolved'], error_lists['backlog']
 
-    resolved_codes = set([d['code'] for d in resolved])
-    unresolved_codes = set([d['code'] for d in unresolved])
-    backlog_codes = set([d['code'] for d in backlog])
+    resolved_codes = [d['code'] for d in resolved]
+    unresolved_codes = [d['code'] for d in unresolved]
+    backlog_codes = [d['code'] for d in backlog]
 
-    LOGGER.info('')
+    LOGGER.info(" resolved codes counts = {}".format(Counter(resolved_codes)))
+    LOGGER.info(" unresolved_count = {}".format(Counter(unresolved_codes)))
+    LOGGER.info(" backlog_count = {}".format(Counter(backlog_codes)))
 
     # Calculate how many errors with *the same error code* are shared between the possible pairs of lists.
-    resolved_unresolved_codes = resolved_codes.intersection(unresolved_codes)
-    resolved_backlog_codes = resolved_codes.intersection(backlog_codes)
-    unresolved_backlog_codes = unresolved_codes.intersection(backlog_codes)
+    resolved_unresolved_codes = set(resolved_codes).intersection(set(unresolved_codes))
+    resolved_backlog_codes = set(resolved_codes).intersection(set(backlog_codes))
+    unresolved_backlog_codes = set(unresolved_codes).intersection(set(backlog_codes))
 
     # Then return a Dict of intersection counts
     return {
@@ -72,7 +75,7 @@ def get_list_intersection_counts() -> Dict[str, int]:
 
 @app.get("/get_error_resolved_counts")
 def get_error_resolved_counts() -> Dict[str, Dict]:
-    """ returns how many times each error.code was resolved """
+    """ Return the num of times each error.code was resolved """
 
     # Generate the three lists required for this calculation
     LOGGER.info('Generating resolved, unresolved and backlog lists.')
@@ -90,7 +93,7 @@ def get_error_resolved_counts() -> Dict[str, Dict]:
 
 @app.get("/get_error_resolved_count")
 def get_error_resolved_count(error_code: int) -> Dict[str, int]:
-    """ returns how many times a certain error.code was resolved """
+    """ Return the num of times a certain error.code was resolved """
     # Generate the three lists required for this calculation
     error_lists = _generate_lists()
 
