@@ -33,19 +33,20 @@ def get_error_counts(err_data: list) -> list:
     return err_data
 
 
-def log_error_codes(data: Dict, _get_counts=False) -> None:
+def log_error_codes(data: Dict, _get_counts=False) -> str:
     """ Print a log of error_codes with counts (human-readable)"""
-
+    log_text = ""
     for key, value in data.items():
         table_name = key  # resolved, unresolved, backlog
         dataset = get_error_counts(value) if _get_counts else value
         header = dataset[0].keys()
         rows = [x.values() for x in dataset]
-        print("List : {} ".format(table_name))
-        print("="*(7+len(table_name)))
-        print(tabulate.tabulate(rows, header, tablefmt='grid'))
-    return
+        log_text += "List : {} \n".format(table_name)
+        log_text += "="*(7+len(table_name)) + "\n"
+        log_text += tabulate.tabulate(rows, header, tablefmt='grid')
+        log_text += "\r\n"
+    return log_text
 
 
-if __name__ == '__main__':
-    log_error_codes(DUMMY_RESOLVED)
+#if __name__ == '__main__':
+    # log_error_codes(DUMMY_RESOLVED)

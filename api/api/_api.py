@@ -50,7 +50,8 @@ def get_list_intersection_counts() -> Dict[str, int]:
     # Generate the three lists required for this calculation
     LOGGER.info('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
     error_lists = _generate_lists()
-    log(error_lists, True)
+    log_text = log(error_lists, True)
+    print(log_text)
 
     resolved, unresolved, backlog = error_lists['resolved'], error_lists['unresolved'], error_lists['backlog']
 
