@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 from fastapi import FastAPI
 import uvicorn
+from  _log import log_error_codes as log
 
 ERROR_CODES = [error_code for error_code in range(50)]
 LOGGER = logging.getLogger("API")
@@ -49,12 +50,17 @@ def get_list_intersection_counts() -> Dict[str, int]:
     # Generate the three lists required for this calculation
     LOGGER.info('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
     error_lists = _generate_lists()
+    log(error_lists, True)
 
     resolved, unresolved, backlog = error_lists['resolved'], error_lists['unresolved'], error_lists['backlog']
 
     resolved_codes = [d['code'] for d in resolved]
     unresolved_codes = [d['code'] for d in unresolved]
     backlog_codes = [d['code'] for d in backlog]
+
+    all_codes = resolved_codes + unresolved_codes + backlog_codes
+    new_counter_dict = Counter(all_codes)
+    LOGGER.info(" all codes counts = {}".format(Counter(new_counter_dict)))
 
     LOGGER.info(" resolved codes counts = {}".format(Counter(resolved_codes)))
     LOGGER.info(" unresolved_count = {}".format(Counter(unresolved_codes)))
