@@ -9,8 +9,7 @@ import uvicorn
 from  _log import log_error_codes as log
 
 ERROR_CODES = [error_code for error_code in range(50)]
-LOGGER = logging.getLogger("API")
-logging.basicConfig(level=logging.DEBUG)
+OPERATOR_NAMES = ['OPERATOR A', 'OPERATOR B', 'OPERATOR C']
 app = FastAPI()
 
 
@@ -20,17 +19,20 @@ def _generate_lists() -> Dict[str, Any]:
         'resolved': [{
             'index': error_idx,
             'code': random.choice(ERROR_CODES),
-            'text': 'Error ABC occurred, that is `resolved`'
+            'text': 'Error ABC occurred, that is `resolved`',
+            'operator_name': random.choice(OPERATOR_NAMES),
         } for error_idx in range(50)],
         'unresolved': [{
             'index': error_idx,
             'code': random.choice(ERROR_CODES),
-            'text': 'Error DEF occurred, that is `unresolved`'
+            'text': 'Error DEF occurred, that is `unresolved`',
+            'operator_name': random.choice(OPERATOR_NAMES),
         } for error_idx in range(50, 100)],
         'backlog': [{
             'index': error_idx,
             'code': random.choice(ERROR_CODES),
-            'text': 'Error XYZ occurred, that is in the `backlog`'
+            'text': 'Error XYZ occurred, that is in the `backlog`',
+            'operator_name': random.choice(OPERATOR_NAMES),
         } for error_idx in range(100, 150)]
     }
 
