@@ -1,12 +1,11 @@
 """Module to setup fastapi API to expose API to the outside world."""
-import logging
 import random
 from collections import Counter
 from typing import Any, Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import uvicorn
-from  _log import log_error_codes as log
+from _log import log_info as log
 
 ERROR_CODES = [error_code for error_code in range(50)]
 OPERATOR_NAMES = ['OPERATOR A', 'OPERATOR B', 'OPERATOR C']
@@ -15,7 +14,8 @@ app = FastAPI()
 
 def _generate_lists() -> Dict[str, Any]:
     """Generate resolved, unresolved and backlog lists."""
-    return {
+    log('Generating resolved, unresolved and backlog lists.')
+    error_lists = {
         'resolved': [{
             'index': error_idx,
             'code': random.choice(ERROR_CODES),
@@ -36,11 +36,19 @@ def _generate_lists() -> Dict[str, Any]:
         } for error_idx in range(100, 150)]
     }
 
+    log(error_lists, 'code', True)
+    log(error_lists, 'operator_name', True)
+    return error_lists
+
+
+@app.get("/")
+async def root():
+    # test whether end-point setup works
+    return {"message": "Hello World"}
 
 @app.get("/get_lists")
 def get_lists() -> Dict[str, Any]:
     """Return resolved, unresolved and backlog lists."""
-    LOGGER.info('Generating resolved, unresolved, and backlog lists.')
     return _generate_lists()
 
 
@@ -50,26 +58,17 @@ def get_list_intersection_counts() -> Dict[str, int]:
         intersection_counts: Dict[str, int]
     """
     # Generate the three lists required for this calculation
-    LOGGER.info('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
     error_lists = _generate_lists()
-    log_text = log(error_lists, True)
-    print(log_text)
 
     resolved, unresolved, backlog = error_lists['resolved'], error_lists['unresolved'], error_lists['backlog']
 
+    # create three lists for error_codes of each type
     resolved_codes = [d['code'] for d in resolved]
     unresolved_codes = [d['code'] for d in unresolved]
     backlog_codes = [d['code'] for d in backlog]
 
-    all_codes = resolved_codes + unresolved_codes + backlog_codes
-    new_counter_dict = Counter(all_codes)
-    LOGGER.info(" all codes counts = {}".format(Counter(new_counter_dict)))
-
-    LOGGER.info(" resolved codes counts = {}".format(Counter(resolved_codes)))
-    LOGGER.info(" unresolved_count = {}".format(Counter(unresolved_codes)))
-    LOGGER.info(" backlog_count = {}".format(Counter(backlog_codes)))
-
     # Calculate how many errors with *the same error code* are shared between the possible pairs of lists.
+    log('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
     resolved_unresolved_codes = set(resolved_codes).intersection(set(unresolved_codes))
     resolved_backlog_codes = set(resolved_codes).intersection(set(backlog_codes))
     unresolved_backlog_codes = set(unresolved_codes).intersection(set(backlog_codes))
@@ -109,31 +108,17 @@ def get_error_resolved_all_counts(list_type='resolved') -> Dict[str, Dict]:
         throws HTTPException (404), if list_type is not found
      """
     # Generate the three lists required for this calculation
-    LOGGER.info('Generating resolved, unresolved and backlog lists.')
-    error_lists = _generate_lists()
+    _error_lists = _generate_lists()
 
-    resolved = error_lists['resolved']
-    resolved_codes = [d['code'] for d in resolved]
-    # print(*resolved_codes)
-    resolved_dict = Counter(resolved_codes)
+    try:
+        err_list = _error_lists[list_type]
+    except KeyError:
+        raise HTTPException(status_code=404, detail="list_type not found")
 
+    err_codes = [d['code'] for d in err_list]
+    err_dict = Counter(err_codes)
     return {
-        'resolved': resolved_dict,
-    }
-
-
-@app.get("/get_error_resolved_count")
-def get_error_resolved_count(error_code: int) -> Dict[str, int]:
-    """ Return the num of times a certain error.code was resolved """
-    # Generate the three lists required for this calculation
-    error_lists = _generate_lists()
-
-    resolved = error_lists['resolved']
-    resolved_codes = [d['code'] for d in resolved]
-    # print(*resolved_codes)
-    resolved_count = resolved_codes.count(error_code)
-    return {
-        'resolved': resolved_count,
+        list_type: err_dict,
     }
 
 
