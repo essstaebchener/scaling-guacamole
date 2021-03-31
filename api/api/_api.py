@@ -82,10 +82,32 @@ def get_list_intersection_counts() -> Dict[str, int]:
     }
 
 
-@app.get("/get_error_resolved_counts")
-def get_error_resolved_counts() -> Dict[str, Dict]:
-    """ Return the num of times each error.code was resolved """
+@app.get("/get_error_resolved_count")
+def get_error_resolved_count(error_code: int) -> Dict[str, int]:
+    """ Return the num of times a certain error.code was resolved
+        throws HTTPException, if error_code not found
+    """
+    # TODO: should we instead return count = 0 if err_code not found?
 
+    # Generate the three lists required for this calculation
+    error_lists = _generate_lists()
+
+    resolved = error_lists['resolved']
+    resolved_codes = [d['code'] for d in resolved]
+    if error_code not in resolved_codes:
+        raise HTTPException(status_code=404, detail="error_code not found")
+
+    return {
+        'resolved': resolved_codes.count(error_code),
+    }
+
+
+@app.get("/get_error_all_counts")
+def get_error_resolved_all_counts(list_type='resolved') -> Dict[str, Dict]:
+    """ Return the num of times each error.code occurred on the list_type selected
+        list_type : 'resolved', 'unresolved', or 'backlog' (default: 'resolved')
+        throws HTTPException (404), if list_type is not found
+     """
     # Generate the three lists required for this calculation
     LOGGER.info('Generating resolved, unresolved and backlog lists.')
     error_lists = _generate_lists()
