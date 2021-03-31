@@ -43,7 +43,7 @@ def _generate_lists() -> Dict[str, Any]:
 
 @app.get("/")
 async def root():
-    # test whether end-point setup works
+    """" Test whether end-point setup works """
     return {"message": "Hello World"}
 
 @app.get("/get_lists")

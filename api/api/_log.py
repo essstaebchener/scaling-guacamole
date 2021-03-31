@@ -5,6 +5,7 @@ import random
 import copy
 import logging
 
+# TODO: create a class for logging and extend native logging instead
 
 def log_info(data: str or Dict, field='code', _get_counts=False) -> None:
     """ Print a log of error_codes with counts (human-readable)"""
