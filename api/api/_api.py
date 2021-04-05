@@ -14,7 +14,7 @@ app = FastAPI()
 
 def _generate_lists() -> Dict[str, Any]:
     """Generate resolved, unresolved and backlog lists."""
-    log('Generating resolved, unresolved and backlog lists.')
+    log('Generating resolved, unresolved and backlog lists.', logger='API')
     error_lists = {
         'resolved': [{
             'index': error_idx,
@@ -36,8 +36,8 @@ def _generate_lists() -> Dict[str, Any]:
         } for error_idx in range(100, 150)]
     }
 
-    log(error_lists, 'code', True)
-    log(error_lists, 'operator_name', True)
+    log(error_lists, field_name='code', get_counts=True)
+    log(error_lists, field_name='operator_name', get_counts=True)
     return error_lists
 
 
@@ -68,7 +68,7 @@ def get_list_intersection_counts() -> Dict[str, int]:
     backlog_codes = [d['code'] for d in backlog]
 
     # Calculate how many errors with *the same error code* are shared between the possible pairs of lists.
-    log('Generating the intersection counts between a set of resolved, unresolved and backlog lists.')
+    log('Generating the intersection counts between a set of resolved, unresolved and backlog lists.', logger='API')
     resolved_unresolved_codes = set(resolved_codes).intersection(set(unresolved_codes))
     resolved_backlog_codes = set(resolved_codes).intersection(set(backlog_codes))
     unresolved_backlog_codes = set(unresolved_codes).intersection(set(backlog_codes))

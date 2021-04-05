@@ -1,3 +1,5 @@
+"""Module for logging messages or list passed. Uses tabulate to print in a more human-readable form"""
+
 from typing import Dict
 from operator import itemgetter
 import tabulate
@@ -5,27 +7,54 @@ import random
 import copy
 import logging
 
+
 # TODO: create a class for logging and extend native logging instead
 
-def log_info(data: str or Dict, field='code', _get_counts=False) -> None:
-    """ Print a log of error_codes with counts (human-readable)"""
 
-    if type(data) is str:
-        LOGGER = logging.getLogger("API")
-        logging.basicConfig(level=logging.DEBUG)
-        LOGGER.info(data)
-    elif type(data) is dict:
-        # to log the generated lists, we create a deepcopy first
-        # instead of using the original dict
-        _data = copy.deepcopy(data)
-        for key, value in _data.items():
-            table_name = key  # resolved, unresolved, backlog
-            dataset = get_error_counts(value, field) if _get_counts else value
-            header = dataset[0].keys()
-            rows = [x.values() for x in dataset]
-            print("\nList : {} \n".format(table_name))
-            print("="*(7+len(table_name)))
-            print(tabulate.tabulate(rows, header, tablefmt='grid'))
+def log_info(data=None, logger='API', get_counts=False, field_name='code') -> None:
+    """
+    Print a log of error_codes with counts (human-readable)
+    accepts strings or dicts as datasets (`data`)
+    if dict is passed, first key is assumed to be table-name
+    ---
+    INPUTS:
+        data : data to be logged, can be string or dict #TODO: extend this, using Dict for type-check
+        logger : logger name, 'API' by default
+        get_counts : if values need to be tabulated by counts of a column
+        field_name : if counts are needed, then by which field, 'code' by default
+    """
+    _log_str = ""
+
+    if data is None or data == "":
+        _log_str = "log_info() called with empty 'data' param: "
+        _log_str += "log_info(data, logger_name, field_name, _get_counts)"
+    else:
+        if type(data) is str:
+            _log_str = data
+        elif type(data) is dict:
+            # to log the message or generated lists, we use a deepcopy
+            # instead of using the original data
+            _data = copy.deepcopy(data)
+            header = ""
+            rows = ""
+            for key, value in _data.items():
+                table_name = key  # resolved, unresolved, backlog
+                dataset = get_error_counts(value, field_name) if get_counts else value
+                if type(dataset) is list:
+                    # if passed table is a list of dicts
+                    header = dataset[0].keys()
+                    rows = [x.values() for x in dataset]
+                    _log_str += "\nList : {} \n".format(table_name)
+                    _log_str += "=" * (7 + len(table_name)) + "\n"
+                    _log_str += tabulate.tabulate(rows, header, tablefmt='grid')
+                elif type(dataset) is dict:
+                    # if passed table is a dict of dicts
+                    header = dataset.keys()
+                    rows = [v for k, v in dataset.items()]
+
+    str_logger = logging.getLogger(logger)
+    logging.basicConfig(level=logging.INFO)
+    str_logger.info(_log_str)
     return
 
 
@@ -55,9 +84,8 @@ def get_error_counts(err_data: list, field='code') -> list:
 
 # test whether the code works
 if __name__ == '__main__':
-
     # first test message string logging
-    log_info("dummy message #1")
+    log_info("dummy message #1", logger='Test')
 
     # generate the dummy lists
     ERROR_CODES = [error_code for error_code in range(50)]
@@ -72,8 +100,8 @@ if __name__ == '__main__':
     }
 
     # log error codes by operator_name and code
-    log_info(DUMMY_RESOLVED, 'operator_name', True)
-    log_info(DUMMY_RESOLVED, 'code', True)
+    log_info(DUMMY_RESOLVED, field_name='operator_name', get_counts=True)
+    log_info(DUMMY_RESOLVED, field_name='code', get_counts=True)
 
     # test string again
-    log_info("dummy message #2")
+    log_info("dummy message #2", logger='Test')
