@@ -1,3 +1,5 @@
+"""Module for logging messages or list passed. Uses tabulate to print in a more human-readable form"""
+
 from typing import Dict
 from operator import itemgetter
 import tabulate
@@ -7,13 +9,13 @@ import logging
 
 # TODO: create a class for logging and extend native logging instead
 
-def log_info(data: str or Dict, field='code', _get_counts=False) -> None:
+
+def log_info(data: str or Dict, logger='API', field='code', _get_counts=False) -> None:
     """ Print a log of error_codes with counts (human-readable)"""
 
+    log_str = ""
     if type(data) is str:
-        LOGGER = logging.getLogger("API")
-        logging.basicConfig(level=logging.DEBUG)
-        LOGGER.info(data)
+        log_str = data
     elif type(data) is dict:
         # to log the generated lists, we create a deepcopy first
         # instead of using the original dict
@@ -23,9 +25,13 @@ def log_info(data: str or Dict, field='code', _get_counts=False) -> None:
             dataset = get_error_counts(value, field) if _get_counts else value
             header = dataset[0].keys()
             rows = [x.values() for x in dataset]
-            print("\nList : {} \n".format(table_name))
-            print("="*(7+len(table_name)))
-            print(tabulate.tabulate(rows, header, tablefmt='grid'))
+            log_str += "\nList : {} \n".format(table_name)
+            log_str += "="*(7+len(table_name)) + "\n"
+            log_str += tabulate.tabulate(rows, header, tablefmt='grid')
+
+    str_logger = logging.getLogger(logger)
+    logging.basicConfig(level=logging.INFO)
+    str_logger.info(log_str)
     return
 
 
@@ -56,8 +62,9 @@ def get_error_counts(err_data: list, field='code') -> list:
 # test whether the code works
 if __name__ == '__main__':
 
+    
     # first test message string logging
-    log_info("dummy message #1")
+    log_info("dummy message #1", logger='Test')
 
     # generate the dummy lists
     ERROR_CODES = [error_code for error_code in range(50)]
@@ -72,8 +79,8 @@ if __name__ == '__main__':
     }
 
     # log error codes by operator_name and code
-    log_info(DUMMY_RESOLVED, 'operator_name', True)
-    log_info(DUMMY_RESOLVED, 'code', True)
+    log_info(DUMMY_RESOLVED, field='operator_name', _get_counts=True)
+    log_info(DUMMY_RESOLVED, field='code', _get_counts=True)
 
     # test string again
-    log_info("dummy message #2")
+    log_info("dummy message #2", logger='Test')
