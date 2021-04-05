@@ -36,8 +36,8 @@ def _generate_lists() -> Dict[str, Any]:
         } for error_idx in range(100, 150)]
     }
 
-    log(error_lists, field='code', _get_counts=True)
-    log(error_lists, field='operator_name', _get_counts=True)
+    log(error_lists, field_name='code', get_counts=True)
+    log(error_lists, field_name='operator_name', get_counts=True)
     return error_lists
 
 
