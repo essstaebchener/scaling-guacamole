@@ -53,8 +53,8 @@ _Notes_:- TODO:
 _frontend_
 
 -   [ ] Write a UI that allows the operator to:
-  -   [ ] have an "nice" overview of all errors, it should show `unresolved`, then `resolved` and then `backlog` errors
-  -   [ ] see the `text` and `code` of each error
+  -   [x] have an "nice" overview of all errors, it should show `unresolved`, then `resolved` and then `backlog` errors
+  -   [x] see the `text` and `code` of each error
   -   [ ] resolve each individual `unresolved` error by clicking an individual button
   -   [ ] unresolve each individual `resolved` error (e.g., when an error was set to `resolved` by mistake) by clicking an individual button
   -   [ ] move an individual backlog error to the bottom of the `unresolved` list of displayed errors, by clicking an individual button
