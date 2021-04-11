@@ -21,14 +21,22 @@ Our company wants to write a checking tool for internal JSONs that store data. T
 We then wrote an API that will get all errors generated so far, separated by their status. A human operator has to be able to see and understand these errors in order to fix them in the original data. Our company strives to reduce errors to almost zero by providing a flawless UI/UX for operators to check errors and resolve them.
 
 ## Challenge task
-
 Some other developer already wrote an API that delivers errors sorted into the 3 available categories: resolved, unresolved, backlog. Another developer has already started on the frontend, but he only did the bare minimum.
-
 The tasks are split across the frontend and the api, the main focus lies on data manipulation and UI/UX implementation.
+
+
+To access the api endpoints, call from the frontend on:
+* http://localhost:8000/get_lists : to generate (get) lists of the 3 types
+* http://localhost:8000/get_list_intersection_counts : to get the error intersection counts between a set of resolved, unresolved and backlog lists
+* http://localhost:8000/get_error_resolved_count/error_code= : the num of times a certain error.code was resolved
+* http://localhost:8000//get_error_all_counts : the num of times each error.code occurred on the list_type selected
+
+Check http://localhost:8000/docs for Swagger API documentation.
+Presently only the first end-point is used on the frontend: error_lists are generated from get_lists 
+
 
 Completed tasks are checked. Additional stretch-goal tasks are also listed with the rest. 
 Functions have basic documentation about code.
-
 Additional TO-DOs are listed afterwards.
 
 _backend_
